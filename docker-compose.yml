@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdfjs-viewer
+    image: klongchu/pdfjs-viewer
+    ports:
+      - "11182:80"

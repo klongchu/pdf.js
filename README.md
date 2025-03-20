@@ -135,3 +135,17 @@ Talk to us on Matrix:
 File an issue:
 
 + https://github.com/mozilla/pdf.js/issues/new/choose
+
+
+## Deploy
+
+```bash
+docker build -f Dockerfile -t klongchu/pdfjs-viewer .
+#docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile -t klongchu/pdfjs-viewer:v3 . --push
+docker run -p 8000:80 klongchu/pdfjs-viewer
+```
+
+## Usage
+
+```bash
+http://localhost:8000/web/viewer.html?file=https://xxx.xxx.com/20230315.pdf

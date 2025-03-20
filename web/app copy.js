@@ -50,7 +50,6 @@ import {
   InvalidPDFException,
   isDataScheme,
   isPdfFile,
-  OutputScale,
   PDFWorker,
   ResponseException,
   shadow,
@@ -479,7 +478,6 @@ const PDFViewerApplication = {
         : null;
 
     const enableHWA = AppOptions.get("enableHWA"),
-      maxCanvasPixels = AppOptions.get("maxCanvasPixels"),
       maxCanvasDim = AppOptions.get("maxCanvasDim");
     const pdfViewer = new PDFViewer({
       container,
@@ -508,7 +506,7 @@ const PDFViewerApplication = {
       ),
       imageResourcesPath: AppOptions.get("imageResourcesPath"),
       enablePrintAutoRotate: AppOptions.get("enablePrintAutoRotate"),
-      maxCanvasPixels,
+      maxCanvasPixels: AppOptions.get("maxCanvasPixels"),
       maxCanvasDim,
       enableDetailCanvas: AppOptions.get("enableDetailCanvas"),
       enablePermissions: AppOptions.get("enablePermissions"),
@@ -531,7 +529,6 @@ const PDFViewerApplication = {
         eventBus,
         renderingQueue: pdfRenderingQueue,
         linkService: pdfLinkService,
-        maxCanvasPixels,
         maxCanvasDim,
         pageColors,
         abortSignal,
@@ -1153,9 +1150,7 @@ const PDFViewerApplication = {
   async download() {
     let data;
     try {
-      data = await (this.pdfDocument
-        ? this.pdfDocument.getData()
-        : this.pdfLoadingTask.getData());
+      data = await this.pdfDocument.getData();
     } catch {
       // When the PDF document isn't ready, simply download using the URL.
     }
@@ -2094,7 +2089,7 @@ const PDFViewerApplication = {
         pdfViewer.refresh();
       }
       const mediaQueryList = window.matchMedia(
-        `(resolution: ${OutputScale.pixelRatio}dppx)`
+        `(resolution: ${window.devicePixelRatio || 1}dppx)`
       );
       mediaQueryList.addEventListener("change", addWindowResolutionChange, {
         once: true,
@@ -2300,6 +2295,7 @@ if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
       return;
     }
     const viewerOrigin = URL.parse(window.location)?.origin || "null";
+    console.log("viewerOrigin", viewerOrigin);
     if (HOSTED_VIEWER_ORIGINS.has(viewerOrigin)) {
       // Hosted or local viewer, allow for any file locations
       return;
@@ -2316,7 +2312,7 @@ if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
     // Removing of the following line will not guarantee that the viewer will
     // start accepting URLs from foreign origin -- CORS headers on the remote
     // server must be properly configured.
-    throw ex;
+    // throw ex;
   };
 
   // eslint-disable-next-line no-var
@@ -2696,19 +2692,18 @@ function onWheel(evt) {
   }
 }
 
-function closeSecondaryToolbar({ target }) {
+function closeSecondaryToolbar(evt) {
   if (!this.secondaryToolbar?.isOpen) {
     return;
   }
-  const { toolbar, secondaryToolbar } = this.appConfig;
+  const appConfig = this.appConfig;
   if (
-    this.pdfViewer.containsElement(target) ||
-    (toolbar?.container.contains(target) &&
-      !secondaryToolbar?.toolbar.contains(target) &&
+    this.pdfViewer.containsElement(evt.target) ||
+    (appConfig.toolbar?.container.contains(evt.target) &&
       // TODO: change the `contains` for an equality check when the bug:
       //  https://bugzilla.mozilla.org/show_bug.cgi?id=1921984
       // is fixed.
-      !secondaryToolbar?.toggleButton.contains(target))
+      !appConfig.secondaryToolbar?.toggleButton.contains(evt.target))
   ) {
     this.secondaryToolbar.close();
   }
