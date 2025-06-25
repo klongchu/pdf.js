@@ -2293,6 +2293,7 @@ if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
     "https://storage.budhosp.com",
     "https://storage-api.budhosp.com",
     "https://accounts.budhosp.com",
+    "https://doctor.budhosp.com"
   ]);
   // eslint-disable-next-line no-var
   var validateFileURL = function (file) {
